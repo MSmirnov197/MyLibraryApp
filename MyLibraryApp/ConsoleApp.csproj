@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataAccesLayer\DataAccesLayer.csproj" />
     <ProjectReference Include="..\logicc\logicc.csproj" />
   </ItemGroup>
 

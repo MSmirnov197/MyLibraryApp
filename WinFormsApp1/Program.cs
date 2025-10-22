@@ -1,21 +1,29 @@
 using System;
 using System.Windows.Forms;
-using WinFormApp;
+using logicc;
+using DataAccessLayer;
 
 namespace WinFormsApp1
 {
-    internal static class Program
+    static class Program
     {
         /// <summary>
-        /// The main entry point for the application.
+        /// Главная точка входа для приложения.
         /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // Выберите нужный репозиторий при создании экземпляра Logic
+            // Например, для Entity Framework:
+            // var repository = new EntityRepository<Model.Book>(new LibraryDbContext());
+            // Для Dapper:
+            var repository = new DapperRepository<Model.Book>("Data Source=(localdb)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\РС\\Source\\Repos\\MyLibraryApp\\MyLibraryApp\\Database1.mdf;Integrated Security=True;");
+
+            var logic = new Logic();
+            Application.Run(new test());
         }
     }
 }

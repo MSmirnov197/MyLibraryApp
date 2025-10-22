@@ -1,31 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataAccessLayer;
 using Model;
 
 namespace logicc
 {
     /// <summary>
-    /// Представляет логику приложения для управления книгами.
+    /// Предоставляет бизнес-логику для работы с книгами, используя репозиторий.
     /// </summary>
     public class Logic
     {
-        private List<Book> books = new List<Book>();
+        private readonly IRepository<Book> _repository;
 
         /// <summary>
-        /// Создает новую книгу с указанным ID и добавляет ее в список.
+        /// Инициализирует новый экземпляр класса <see cref="Logic"/> с использованием указанного репозитория.
+        /// </summary>
+        /// <param name="repository">Репозиторий для работы с сущностями <see cref="Book"/>.</param>
+        public Logic()
+        {
+            //var dbContext = new LibraryDbContext();
+            //var bookRepository = new EntityRepository<Model.Book>(dbContext);
+            //logic = new Logic(bookRepository);
+            _repository = new DapperRepository<Model.Book>("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\РС\\source\\repos\\MyLibraryApp\\DataAccesLayer\\Database1.mdf;Integrated Security=True");
+        }
+
+        /// <summary>
+        /// Создает новую книгу и добавляет ее в хранилище.
         /// </summary>
         /// <param name="id">Уникальный идентификатор книги.</param>
         /// <param name="title">Название книги.</param>
         /// <param name="author">Автор книги.</param>
         /// <param name="genre">Жанр книги.</param>
-        /// <param name="year">Год издания книги.</param>
-        /// <param name="quantity">Количество книг.</param>
+        /// <param name="year">Год издания.</param>
+        /// <param name="quantity">Количество экземпляров.</param>
         public void CreateBook(int id, string title, string author, string genre, int year, int quantity)
         {
-            if (books.Any(b => b.Id == id))
-                throw new ArgumentException($"Книга с ID {id} уже существует.");
-
             var book = new Book
             {
                 Id = id,
@@ -35,27 +45,27 @@ namespace logicc
                 Year = year,
                 Quantity = quantity
             };
-            books.Add(book);
+            _repository.Add(book);
         }
 
         /// <summary>
-        /// Удаляет книгу по идентификатору.
+        /// Удаляет книгу из хранилища по ее идентификатору.
         /// </summary>
         /// <param name="id">Идентификатор книги для удаления.</param>
-        /// <returns>Возвращает true, если книга была успешно удалена, и false в противном случае.</returns>
+        /// <returns>True, если книга была успешно удалена; в противном случае False.</returns>
         public bool DeleteBook(int id)
         {
-            return books.RemoveAll(b => b.Id == id) > 0;
+            return _repository.Delete(id);
         }
 
         /// <summary>
-        /// Возвращает книгу по идентификатору в виде DTO.
+        /// Читает информацию о книге по ее идентификатору и возвращает ее в виде DTO.
         /// </summary>
-        /// <param name="id">Идентификатор книги для поиска.</param>
-        /// <returns>Объект BookDTO, если книга найдена, и null в противном случае.</returns>
+        /// <param name="id">Идентификатор книги для чтения.</param>
+        /// <returns>Объект <see cref="BookDTO"/>, содержащий информацию о книге, или null, если книга не найдена.</returns>
         public BookDTO ReadBook(int id)
         {
-            var book = books.FirstOrDefault(b => b.Id == id);
+            var book = _repository.ReadById(id);
             return book == null ? null : new BookDTO
             {
                 Id = book.Id,
@@ -68,34 +78,36 @@ namespace logicc
         }
 
         /// <summary>
-        /// Обновляет информацию о книге по идентификатору.
+        /// Обновляет существующую книгу в хранилище.
         /// </summary>
         /// <param name="id">Идентификатор книги для обновления.</param>
         /// <param name="title">Новое название книги.</param>
         /// <param name="author">Новый автор книги.</param>
         /// <param name="genre">Новый жанр книги.</param>
-        /// <param name="year">Новый год издания книги.</param>
-        /// <param name="quantity">Новое количество книг.</param>
-        /// <returns>Возвращает true, если книга была успешно обновлена, и false в противном случае.</returns>
+        /// <param name="year">Новый год издания.</param>
+        /// <param name="quantity">Новое количество экземпляров.</param>
+        /// <returns>True, если книга была успешно обновлена; в противном случае False.</returns>
         public bool UpdateBook(int id, string title, string author, string genre, int year, int quantity)
         {
-            var book = books.FirstOrDefault(b => b.Id == id);
-            if (book == null) return false;
-
-            book.Title = title;
-            book.Author = author;
-            book.Genre = genre;
-            book.Year = year;
-            book.Quantity = quantity;
-            return true;
+            var book = new Book
+            {
+                Id = id,
+                Title = title,
+                Author = author,
+                Genre = genre,
+                Year = year,
+                Quantity = quantity
+            };
+            return _repository.Update(book);
         }
 
         /// <summary>
-        /// Группирует книги по жанрам и возвращает в виде DTO.
+        /// Группирует все книги в хранилище по их жанрам.
         /// </summary>
-        /// <returns>Словарь, где ключ - жанр, а значение - список BookDTO этого жанра.</returns>
+        /// <returns>Словарь, где ключ - жанр, а значение - список объектов <see cref="BookDTO"/>, относящихся к этому жанру.</returns>
         public Dictionary<string, List<BookDTO>> GroupBooksByGenre()
         {
+            var books = _repository.ReadAll();
             return books.GroupBy(b => b.Genre)
                         .ToDictionary(
                             g => g.Key,
@@ -112,11 +124,12 @@ namespace logicc
         }
 
         /// <summary>
-        /// Возвращает список всех книг в виде BookDTO.
+        /// Получает список всех книг из хранилища, преобразуя их в объекты <see cref="BookDTO"/>.
         /// </summary>
-        /// <returns>Список всех книг в виде BookDTO.</returns>
+        /// <returns>Список всех книг.</returns>
         public List<BookDTO> GetAllBooks()
         {
+            var books = _repository.ReadAll();
             return books.Select(b => new BookDTO
             {
                 Id = b.Id,
@@ -129,12 +142,12 @@ namespace logicc
         }
 
         /// <summary>
-        /// Возвращает список доступных жанров.
+        /// Предоставляет предопределенный массив доступных жанров.
         /// </summary>
-        /// <returns>Массив доступных жанров.</returns>
+        /// <returns>Массив строк, представляющих доступные жанры.</returns>
         public string[] GetAvailableGenres()
         {
-            return new[] { "драма", "фантастика", "приключения", "роман", "повесть", "детектив", "научная литература" };
+            return new[] { "drama", "science fiction", "adventure", "novel", "short story", "detective", "scientific literature" };
         }
     }
 }

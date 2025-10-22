@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "logicc", "logicc\logicc.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{28328389-BE62-4237-AC27-F78363DC45D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccesLayer", "DataAccesLayer\DataAccesLayer.csproj", "{ECF419F7-1187-40B0-A068-665441E2C19D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +35,15 @@ Global
 		{28328389-BE62-4237-AC27-F78363DC45D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28328389-BE62-4237-AC27-F78363DC45D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28328389-BE62-4237-AC27-F78363DC45D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECF419F7-1187-40B0-A068-665441E2C19D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECF419F7-1187-40B0-A068-665441E2C19D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECF419F7-1187-40B0-A068-665441E2C19D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECF419F7-1187-40B0-A068-665441E2C19D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {711B48FF-1205-4389-B856-717FB1CA401C}
 	EndGlobalSection
 EndGlobal
