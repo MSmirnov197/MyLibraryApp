@@ -19,6 +19,7 @@
             }
             base.Dispose(disposing);
         }
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -46,6 +47,10 @@
             label5 = new Label();
             label6 = new Label();
             txtQuantity = new TextBox();
+            cmbGroupBy = new ComboBox();
+            txtSearch = new TextBox();
+            btnSearch = new Button();
+            btnClearSearch = new Button();
             SuspendLayout();
             // 
             // listBoxBooks
@@ -150,7 +155,7 @@
             btnGroup.Name = "btnGroup";
             btnGroup.Size = new Size(181, 27);
             btnGroup.TabIndex = 11;
-            btnGroup.Text = "Группировка по жанрам";
+            btnGroup.Text = "Группировка";
             btnGroup.UseVisualStyleBackColor = true;
             btnGroup.Click += btnGroup_Click;
             // 
@@ -161,7 +166,7 @@
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(181, 27);
             btnClear.TabIndex = 12;
-            btnClear.Text = "Очистить";
+            btnClear.Text = "Очистить поля";
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
@@ -233,11 +238,54 @@
             txtQuantity.Size = new Size(116, 23);
             txtQuantity.TabIndex = 6;
             // 
-            // Form1
+            // cmbGroupBy
+            // 
+            cmbGroupBy.FormattingEnabled = true;
+            cmbGroupBy.Location = new Point(257, 427);
+            cmbGroupBy.Margin = new Padding(4, 3, 4, 3);
+            cmbGroupBy.Name = "cmbGroupBy";
+            cmbGroupBy.Size = new Size(88, 23);
+            cmbGroupBy.TabIndex = 19;
+            // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(257, 462);
+            txtSearch.Margin = new Padding(4, 3, 4, 3);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(116, 23);
+            txtSearch.TabIndex = 20;
+            // 
+            // btnSearch
+            // 
+            btnSearch.Location = new Point(350, 427);
+            btnSearch.Margin = new Padding(4, 3, 4, 3);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(88, 27);
+            btnSearch.TabIndex = 21;
+            btnSearch.Text = "Поиск";
+            btnSearch.UseVisualStyleBackColor = true;
+            btnSearch.Click += btnSearch_Click;
+            // 
+            // btnClearSearch
+            // 
+            btnClearSearch.Location = new Point(350, 462);
+            btnClearSearch.Margin = new Padding(4, 3, 4, 3);
+            btnClearSearch.Name = "btnClearSearch";
+            btnClearSearch.Size = new Size(88, 27);
+            btnClearSearch.TabIndex = 22;
+            btnClearSearch.Text = "Очистить поиск";
+            btnClearSearch.UseVisualStyleBackColor = true;
+            btnClearSearch.Click += btnClearSearch_Click;
+            // 
+            // test
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(448, 520);
+            Controls.Add(btnClearSearch);
+            Controls.Add(btnSearch);
+            Controls.Add(txtSearch);
+            Controls.Add(cmbGroupBy);
             Controls.Add(label6);
             Controls.Add(label5);
             Controls.Add(label4);
@@ -258,7 +306,7 @@
             Controls.Add(txtId);
             Controls.Add(listBoxBooks);
             Margin = new Padding(4, 3, 4, 3);
-            Name = "Form1";
+            Name = "test";
             Text = "Библиотека";
             Load += Form1_Load;
             ResumeLayout(false);
@@ -286,5 +334,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox cmbGroupBy;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.Button btnSearch;
+        private System.Windows.Forms.Button btnClearSearch;
     }
 }

@@ -1,18 +1,30 @@
 ﻿using System;
 using System.Linq;
 using logicc;
-
+using Ninject;
 
 namespace ConsoleApp
 {
+    /// <summary>
+    /// Главный класс консольного приложения для управления библиотекой книг.
+    /// Предоставляет пользовательский интерфейс для выполнения CRUD операций и аналитики.
+    /// </summary>
     class Program
     {
         static Logic logic;
 
+        /// <summary>
+        /// Точка входа в консольное приложение.
+        /// Инициализирует DI-контейнер и запускает главный цикл приложения.
+        /// </summary>
+        /// <param name="args">Аргументы командной строки.</param>
         static void Main(string[] args)
         {
-           
-            logic = new Logic();
+            // Создаем ядро Ninject и регистрируем зависимости
+            IKernel ninjectKernel = new StandardKernel(new AdvancedConfigModule());
+
+            // Получаем экземпляр Logic через контейнер
+            logic = ninjectKernel.Get<Logic>();
 
             Console.WriteLine("📚 Приложение 'Библиотека' — Консольная версия");
             Console.WriteLine("============================================");
@@ -26,7 +38,9 @@ namespace ConsoleApp
                 Console.WriteLine("4. Обновить книгу");
                 Console.WriteLine("5. Показать все книги");
                 Console.WriteLine("6. Группировка книг по жанру");
-                Console.WriteLine("7. Выход");
+                Console.WriteLine("7. Поиск книг");
+                Console.WriteLine("8. Расширенная группировка");
+                Console.WriteLine("9. Выход");
 
                 var choice = Console.ReadLine();
 
@@ -63,6 +77,16 @@ namespace ConsoleApp
                         Console.Clear();
                         break;
                     case "7":
+                        SearchBooks();
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
+                    case "8":
+                        ShowAdvancedGrouping();
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
+                    case "9":
                         Console.WriteLine("Завершение работы...");
                         return;
                     default:
@@ -72,6 +96,9 @@ namespace ConsoleApp
             }
         }
 
+        /// <summary>
+        /// Добавляет новую книгу в библиотеку после валидации введенных данных.
+        /// </summary>
         static void AddBook()
         {
             try
@@ -105,8 +132,15 @@ namespace ConsoleApp
                 int quantity = GetValidQuantity();
                 if (quantity == -1) return;
 
-                logic.CreateBook(id, title, author, genre, year, quantity);
-                Console.WriteLine("✅ Книга успешно добавлена!");
+                var result = logic.CreateBook(id, title, author, genre, year, quantity);
+                if (result.Success)
+                {
+                    Console.WriteLine("✅ Книга успешно добавлена!");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Ошибка: {result.Message}");
+                }
             }
             catch (ArgumentException ex)
             {
@@ -114,6 +148,9 @@ namespace ConsoleApp
             }
         }
 
+        /// <summary>
+        /// Удаляет книгу из библиотеки по указанному идентификатору.
+        /// </summary>
         static void DeleteBook()
         {
             Console.Write("Введите ID книги для удаления: ");
@@ -129,6 +166,9 @@ namespace ConsoleApp
                 Console.WriteLine("❌ Книга с таким ID не найдена.");
         }
 
+        /// <summary>
+        /// Находит и отображает информацию о книге по указанному идентификатору.
+        /// </summary>
         static void ReadBook()
         {
             Console.Write("Введите ID книги: ");
@@ -145,6 +185,9 @@ namespace ConsoleApp
                 Console.WriteLine("❌ Книга не найдена.");
         }
 
+        /// <summary>
+        /// Обновляет информацию о существующей книге.
+        /// </summary>
         static void UpdateBook()
         {
             Console.Write("Введите ID книги для редактирования: ");
@@ -182,6 +225,9 @@ namespace ConsoleApp
                 Console.WriteLine("❌ Не удалось обновить книгу.");
         }
 
+        /// <summary>
+        /// Отображает все книги, находящиеся в библиотеке.
+        /// </summary>
         static void ShowAllBooks()
         {
             var all = logic.GetAllBooks();
@@ -196,6 +242,10 @@ namespace ConsoleApp
                 Console.WriteLine($"  {book}");
         }
 
+        /// <summary>
+        /// Группирует и отображает книги по жанрам.
+        /// Демонстрирует принцип единственной ответственности - отдельный метод для конкретного типа группировки.
+        /// </summary>
         static void ShowGroupedBooks()
         {
             var grouped = logic.GroupBooksByGenre();
@@ -214,6 +264,82 @@ namespace ConsoleApp
             }
         }
 
+        /// <summary>
+        /// Выполняет поиск книг по названию, автору или жанру.
+        /// </summary>
+        static void SearchBooks()
+        {
+            Console.Write("🔍 Введите поисковый запрос: ");
+            var searchTerm = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                Console.WriteLine("❌ Поисковый запрос не может быть пустым.");
+                return;
+            }
+
+            var results = logic.SearchBooks(searchTerm);
+            if (results == null || results.Count == 0)
+            {
+                Console.WriteLine("📚 По вашему запросу ничего не найдено.");
+                return;
+            }
+
+            Console.WriteLine($"\n🔍 Найдено {results.Count} книг:");
+            foreach (var book in results)
+                Console.WriteLine($"  {book}");
+        }
+
+        /// <summary>
+        /// Предоставляет расширенную функциональность группировки книг по различным критериям.
+        /// Демонстрирует принцип открытости/закрытости - система легко расширяется новыми стратегиями группировки.
+        /// </summary>
+        static void ShowAdvancedGrouping()
+        {
+            var availableGroupers = logic.GetAvailableGroupers();
+            if (availableGroupers == null || !availableGroupers.Any())
+            {
+                Console.WriteLine("❌ Нет доступных группировок.");
+                return;
+            }
+
+            Console.WriteLine("\n📊 Доступные группировки:");
+            int index = 1;
+            foreach (var grouper in availableGroupers)
+            {
+                Console.WriteLine($"  {index}. По {grouper}");
+                index++;
+            }
+
+            Console.Write("Выберите тип группировки: ");
+            if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > availableGroupers.Count())
+            {
+                Console.WriteLine("❌ Неверный выбор.");
+                return;
+            }
+
+            var groupKey = availableGroupers.ElementAt(choice - 1);
+            var grouped = logic.GroupBooksBy(groupKey);
+
+            if (grouped.Count == 0)
+            {
+                Console.WriteLine("📚 Нет книг для группировки.");
+                return;
+            }
+
+            Console.WriteLine($"\n📌 Группировка по {groupKey}:");
+            foreach (var group in grouped)
+            {
+                Console.WriteLine($"  ➤ {group.Key}:");
+                foreach (var book in group.Value)
+                    Console.WriteLine($"      • {book.Title} ({book.Author})");
+            }
+        }
+
+        /// <summary>
+        /// Получает и валидирует название книги от пользователя.
+        /// </summary>
+        /// <returns>Валидное название книги или null при ошибке.</returns>
         static string GetValidTitle()
         {
             Console.Write("Введите название: ");
@@ -226,6 +352,10 @@ namespace ConsoleApp
             return title.Trim();
         }
 
+        /// <summary>
+        /// Получает и валидирует имя автора от пользователя.
+        /// </summary>
+        /// <returns>Валидное имя автора или null при ошибке.</returns>
         static string GetValidAuthor()
         {
             Console.Write("Введите автора: ");
@@ -244,6 +374,11 @@ namespace ConsoleApp
             return author.Trim();
         }
 
+        /// <summary>
+        /// Проверяет, содержит ли строка только буквы и пробелы.
+        /// </summary>
+        /// <param name="name">Строка для проверки.</param>
+        /// <returns>True, если строка содержит только допустимые символы.</returns>
         static bool IsValidName(string name)
         {
             foreach (char c in name)
@@ -254,6 +389,11 @@ namespace ConsoleApp
             return true;
         }
 
+        /// <summary>
+        /// Получает и валидирует жанр книги от пользователя.
+        /// Предоставляет список доступных жанров для выбора.
+        /// </summary>
+        /// <returns>Валидный жанр книги или null при ошибке.</returns>
         static string GetValidGenre()
         {
             string[] validGenres = logic.GetAvailableGenres();
@@ -287,6 +427,10 @@ namespace ConsoleApp
             return input;
         }
 
+        /// <summary>
+        /// Получает и валидирует год издания книги от пользователя.
+        /// </summary>
+        /// <returns>Валидный год издания или 0 при ошибке.</returns>
         static int GetValidYear()
         {
             Console.Write("Введите год издания: ");
@@ -305,6 +449,10 @@ namespace ConsoleApp
             return year;
         }
 
+        /// <summary>
+        /// Получает и валидирует количество экземпляров книги от пользователя.
+        /// </summary>
+        /// <returns>Валидное количество или -1 при ошибке.</returns>
         static int GetValidQuantity()
         {
             Console.Write("Введите количество книг: ");
@@ -314,9 +462,9 @@ namespace ConsoleApp
                 return -1;
             }
 
-            if (quantity <= 0)
+            if (quantity < 0)
             {
-                Console.WriteLine("❌ Количество должно быть положительным.");
+                Console.WriteLine("❌ Количество должно быть неотрицательным.");
                 return -1;
             }
 

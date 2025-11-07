@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 using logicc;
-using DataAccessLayer;
+// УБРАТЬ Ninject - используй простой конструктор
 
 namespace WinFormsApp1
 {
@@ -16,14 +16,22 @@ namespace WinFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Выберите нужный репозиторий при создании экземпляра Logic
-            // Например, для Entity Framework:
-            // var repository = new EntityRepository<Model.Book>(new LibraryDbContext());
-            // Для Dapper:
-            var repository = new DapperRepository<Model.Book>("Data Source=(localdb)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\РС\\Source\\Repos\\MyLibraryApp\\MyLibraryApp\\Database1.mdf;Integrated Security=True;");
+            // ПРОСТОЕ создание Logic без Ninject
+            var connectionString = @"Data Source=(localdb)\MSSQLLocalDB;AttachDbFilename=C:\Users\Mike\source\repos\Araxis3\MyLibraryApp\DataAccesLayer\Database1.mdf;Integrated Security=True;";
+            var repository = new DataAccessLayer.DapperRepository<Model.Book>(connectionString);
+            var validator = new logicc.BookValidator();
+            var mapper = new logicc.BookMapper();
+            var logger = new logicc.FileLogger();
+            var groupers = new logicc.IBookGrouper[]
+            {
+                new logicc.GenreGrouper(),
+                new logicc.YearGrouper(),
+                new logicc.AuthorGrouper()
+            };
 
-            var logic = new Logic();
-            Application.Run(new test());
+            var logic = new Logic(repository, validator, mapper, groupers, logger);
+
+            Application.Run(new test(logic));
         }
     }
 }

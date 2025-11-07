@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Model
 {
@@ -17,17 +16,17 @@ namespace Model
         /// <summary>
         /// Название книги.
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         /// Автор книги.
         /// </summary>
-        public string Author { get; set; }
+        public string? Author { get; set; }
 
         /// <summary>
         /// Жанр книги.
         /// </summary>
-        public string Genre { get; set; }
+        public string? Genre { get; set; }
 
         /// <summary>
         /// Год издания книги.
@@ -66,9 +65,9 @@ namespace Model
     /// </summary>
     public class Book : IDomainObject
     {
-        private string _author;
-        private string _title;
-        private string _genre;
+        private string? _author;
+        private string? _title;
+        private string? _genre;
         private int _year;
         private int _quantity;
 
@@ -83,7 +82,7 @@ namespace Model
         /// <exception cref="ArgumentException">Выбрасывается, если значение пустое или null.</exception>
         public string Title
         {
-            get => _title;
+            get => _title ?? string.Empty;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -98,7 +97,7 @@ namespace Model
         /// <exception cref="ArgumentException">Выбрасывается, если автор содержит недопустимые символы или пуст.</exception>
         public string Author
         {
-            get => _author;
+            get => _author ?? string.Empty;
             set
             {
                 if (!IsValidAuthor(value))
@@ -113,7 +112,7 @@ namespace Model
         /// <exception cref="ArgumentException">Выбрасывается, если жанр не соответствует списку допустимых жанров.</exception>
         public string Genre
         {
-            get => _genre;
+            get => _genre ?? string.Empty;
             set
             {
                 if (!IsValidGenre(value))
